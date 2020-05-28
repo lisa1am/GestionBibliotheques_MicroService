@@ -2,6 +2,7 @@ package fr.dauphine.miage.Biblio;
 
 
 import com.fasterxml.jackson.databind.util.JSONPObject;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.boot.SpringApplication;
@@ -105,16 +106,17 @@ public class BibliothequeApplication {
 		int strInt = 0;
 		Scanner sc = new Scanner(System.in);
 		ArrayList<Integer> choix = new ArrayList<Integer>();
-		int nbchoix = 4;
+		int nbchoix = 5;
 		for (int i = 1; i <= nbchoix; i++) {
 			choix.add(i);
 		}
 
 		while (!endProgram) {
 			System.out.println("1. Consulter un livre via son isbn");
-			System.out.println("2. Consulter un lecteur via son id");
-			System.out.println("3. Consulter l'historique des prêts");
-			System.out.println("4. Exit");
+			System.out.println("2. Consulter la liste des livres d'un auteur");
+			System.out.println("3. Consulter les informations d'un lecteur avec son identifiant");
+			System.out.println("4. Consulter les lecteurs avec un nom");
+			System.out.println("5. Exit");
 
 			while (!bonchoix) {
 				System.out.println("Veuillez faire un choix :");
@@ -125,24 +127,34 @@ public class BibliothequeApplication {
 				} else {
 					System.out.println("ERROR Veuillez faire un choix parmis les propositions ci-dessous");
 					System.out.println("1. Consulter un livre via son isbn");
-					System.out.println("2. Consulter un lecteur via son id");
-					System.out.println("3. Consulter l'historique des prêts");
-					System.out.println("4. Exit");
+					System.out.println("2. Consulter la liste des livres d'un auteur");
+					System.out.println("3. Consulter les informations d'un lecteur avec son identifiant");
+					System.out.println("4. Consulter les lecteurs avec un nom");
+					System.out.println("5. Exit");
+
 				}
 			}
 
 			boolean succes = false;
 			String commandString = "";
+			Long commandLong;
 			int c = 0;
 			URL req;
 			HttpURLConnection con = null;
+			String isbn = "";
+			String auteur;
+			String titre;
+			String editeur;
+			Long edition;
+			Long idf = new Long(-1);
+			String genre;
+			String nom;
+			String prenom;
+			String date_naissance;
+			String adresse;
+			JSONObject jo = null;
+			JSONArray joArray = null;
 			if (strInt == 1) {
-				String isbn = "";
-				String auteur;
-				String titre;
-				String editeur;
-				Long edition;
-				JSONObject jo = null;
 				while (!succes) {
 					System.out.println("Veuillez indiquer l'isbn (0 pour exit): ");
 					if(c==0) {
@@ -198,12 +210,170 @@ public class BibliothequeApplication {
 				}
 			}
 			if (strInt == 2) {
+				while (!succes) {
+					System.out.println("Veuillez indiquer l'auteur (0 pour exit): ");
+					if(c==0) {
+						sc.nextLine();
+						c++;
+					}
+					commandString = sc.nextLine();
+					req = new URL("http://localhost:8003/livres/auteur/"+commandString.replaceAll(" ","%20"));
+					con = (HttpURLConnection) req.openConnection();
+					con.setRequestMethod("GET");
+					con.setRequestProperty("User-Agent", "Mozilla/5.0");
+					responseCode = con.getResponseCode();
+					if (responseCode == HttpURLConnection.HTTP_OK) { // success
+						BufferedReader in = new BufferedReader(new InputStreamReader(
+								con.getInputStream()));
+						String inputLine;
+						StringBuffer response = new StringBuffer();
 
+						while ((inputLine = in.readLine()) != null) {
+							response.append(inputLine);
+						}
+						in.close();
+
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							joArray = new JSONArray(response.toString());
+							if(joArray.length()>0 || commandString.equals("0")){
+								for(int i = 0; i<joArray.length();i++) {
+									jo = joArray.getJSONObject(i);
+									titre = jo.getString("titre");
+									auteur = jo.getString("auteur");
+									isbn = jo.getString("isbn");
+									editeur = jo.getString("editeur");
+									edition = jo.getLong("edition");
+									System.out.println(jo);
+								}
+								if (commandString.equals("0")) {
+									System.out.println("----- Fin de l'opération de recherche de livres d'un auteur, exit...");
+								}
+								succes = true;
+							}
+							else{
+								System.out.println("Mauvais auteur, aucun livre n'existe pas dans notre base ! Pour exit tapez 0");
+							}
+						}
+						catch(JSONException e){
+							System.out.println(e.getMessage());
+						}
+					} else {
+						System.out.println("GET request not worked");
+					}
+				}
 			}
 			if (strInt == 3) {
-				System.out.println("Exécuter le choix 3");
+				while (!succes) {
+					System.out.println("Veuillez indiquer l'identifiant du lecteur (0 pour exit): ");
+					if(c==0) {
+						sc.nextLine();
+						c++;
+					}
+					commandLong = sc.nextLong();
+					req = new URL("http://localhost:8001/lecteurs/idf/"+commandLong);
+					con = (HttpURLConnection) req.openConnection();
+					con.setRequestMethod("GET");
+					con.setRequestProperty("User-Agent", "Mozilla/5.0");
+					responseCode = con.getResponseCode();
+					if (responseCode == HttpURLConnection.HTTP_OK) { // success
+						BufferedReader in = new BufferedReader(new InputStreamReader(
+								con.getInputStream()));
+						String inputLine;
+						StringBuffer response = new StringBuffer();
+
+						while ((inputLine = in.readLine()) != null) {
+							response.append(inputLine);
+						}
+						in.close();
+
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							jo = new JSONObject(response.toString());
+							idf = jo.getLong("idf");
+							genre = jo.getString("genre");
+							nom = jo.getString("nom");
+							prenom = jo.getString("prenom");
+							date_naissance = jo.getString("date_naissance");
+							adresse = jo.getString("adresse");
+						}
+						catch(JSONException e){
+							System.out.println(e.getMessage());
+						}
+					} else {
+						System.out.println("GET request not worked");
+					}
+
+					if (idf.equals(commandLong) || commandLong.equals(0)) {
+						System.out.println(jo);
+						if (commandLong.equals(0)) {
+							System.out.println("----- Fin de l'opération de recherche de lecteur par idf, exit...");
+						}
+						succes = true;
+					} else {
+						System.out.println("Mauvais idf, le lecteur n'existe pas dans notre base ! Pour exit tapez 0");
+					}
+				}
 			}
 			if (strInt == 4) {
+				while (!succes) {
+					System.out.println("Veuillez indiquer le nom (0 pour exit): ");
+					if(c==0) {
+						sc.nextLine();
+						c++;
+					}
+					commandString = sc.nextLine();
+					req = new URL("http://localhost:8001/lecteurs/nom/"+commandString);
+					con = (HttpURLConnection) req.openConnection();
+					con.setRequestMethod("GET");
+					con.setRequestProperty("User-Agent", "Mozilla/5.0");
+					responseCode = con.getResponseCode();
+					if (responseCode == HttpURLConnection.HTTP_OK) { // success
+						BufferedReader in = new BufferedReader(new InputStreamReader(
+								con.getInputStream()));
+						String inputLine;
+						StringBuffer response = new StringBuffer();
+
+						while ((inputLine = in.readLine()) != null) {
+							response.append(inputLine);
+						}
+						in.close();
+
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							joArray = new JSONArray(response.toString());
+							if(joArray.length()>0 || commandString.equals("0")){
+								for(int i = 0; i<joArray.length();i++) {
+									jo = joArray.getJSONObject(i);
+									idf = jo.getLong("idf");
+									genre = jo.getString("genre");
+									nom = jo.getString("nom");
+									prenom = jo.getString("prenom");
+									date_naissance = jo.getString("date_naissance");
+									adresse = jo.getString("adresse");
+									System.out.println(jo);
+								}
+								if (commandString.equals("0")) {
+									System.out.println("----- Fin de l'opération de recherche de lecteurs par nom, exit...");
+								}
+								succes = true;
+							}
+							else{
+								System.out.println("Mauvais nom, aucun lecteur n'existe pas dans notre base ! Pour exit tapez 0");
+							}
+						}
+						catch(JSONException e){
+							System.out.println(e.getMessage());
+						}
+					} else {
+						System.out.println("GET request not worked");
+					}
+				}
+			}
+			if(strInt==5){
 				endProgram = true;
 			}
 			bonchoix = false;
