@@ -24,15 +24,11 @@ public class BibliothequeApplication {
 
 		SpringApplication.run(BibliothequeApplication.class, args);
 
-		System.out.println("CA MARCHEEEEE !");
-
-		URL obj = null;
+		/*URL obj = null;
 		try {
-			obj = new URL("http://localhost:8003/livres/isbn/1");
+			obj = new URL("http://localhost:8003/livres/isbn/2");
 			HttpURLConnection con = null;
 			con = (HttpURLConnection) obj.openConnection();
-
-
 			con.setRequestMethod("GET");
 			con.setRequestProperty("User-Agent", "Mozilla/5.0");
 			int responseCode = con.getResponseCode();
@@ -64,17 +60,7 @@ public class BibliothequeApplication {
 			}
 		} catch (IOException | JSONException e) {
 			e.printStackTrace();
-		}
-
-		boolean endProgram = false;
-		boolean bonchoix = false;
-		int str = 0;
-		ArrayList<Integer> choix = new ArrayList<Integer>();
-		int nbchoix = 4;
-		for(int i = 1;i<=nbchoix;i++){
-			choix.add(i);
-		}
-
+		}*/
 
 
 		System.out.println("\n\n\nConnexion au service de gestion des livres ... ");
@@ -85,8 +71,8 @@ public class BibliothequeApplication {
 		int responseCode = conLivre.getResponseCode();
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 			System.out.println("Connexion établie !\n\n\n");
-		}else{
-			System.out.println(responseCode+" : Impossible d'atteindre le service. Veuillez vérifier qu'il est bien démarré.");
+		} else {
+			System.out.println(responseCode + " : Impossible d'atteindre le service. Veuillez vérifier qu'il est bien démarré.");
 		}
 
 		System.out.println("\n\n\nConnexion au service de gestion des lecteurs ... ");
@@ -97,8 +83,8 @@ public class BibliothequeApplication {
 		responseCode = conLecteur.getResponseCode();
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 			System.out.println("Connexion établie !\n\n\n");
-		}else{
-			System.out.println(responseCode+" : Impossible d'atteindre le service. Veuillez vérifier qu'il est bien démarré.");
+		} else {
+			System.out.println(responseCode + " : Impossible d'atteindre le service. Veuillez vérifier qu'il est bien démarré.");
 		}
 
 		System.out.println("\n\n\nConnexion au service de gestion des prêts ... ");
@@ -109,56 +95,123 @@ public class BibliothequeApplication {
 		responseCode = conPret.getResponseCode();
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 			System.out.println("Connexion établie !\n\n\n");
-		}else{
-			System.out.println(responseCode+" : Impossible d'atteindre le service. Veuillez vérifier qu'il est bien démarré.");
+		} else {
+			System.out.println(responseCode + " : Impossible d'atteindre le service. Veuillez vérifier qu'il est bien démarré.");
 		}
 
 
+		boolean endProgram = false;
+		boolean bonchoix = false;
+		int strInt = 0;
+		Scanner sc = new Scanner(System.in);
+		ArrayList<Integer> choix = new ArrayList<Integer>();
+		int nbchoix = 4;
+		for (int i = 1; i <= nbchoix; i++) {
+			choix.add(i);
+		}
 
-
-
-			while(!endProgram){
-			System.out.println("1. Ajoutez un lecteur");
-			System.out.println("2. Consulter les lecteurs");
+		while (!endProgram) {
+			System.out.println("1. Consulter un livre via son isbn");
+			System.out.println("2. Consulter un lecteur via son id");
 			System.out.println("3. Consulter l'historique des prêts");
 			System.out.println("4. Exit");
 
-			while(!bonchoix){
-				Scanner sc = new Scanner(System.in);
+			while (!bonchoix) {
 				System.out.println("Veuillez faire un choix :");
-				str = sc.nextInt();
+				strInt = sc.nextInt();
 
-				if(choix.contains(str)){
+				if (choix.contains(strInt)) {
 					bonchoix = true;
-				}
-				else{
+				} else {
 					System.out.println("ERROR Veuillez faire un choix parmis les propositions ci-dessous");
-					System.out.println("1. Ajoutez un lecteur");
-					System.out.println("2. Consulter les lecteurs");
+					System.out.println("1. Consulter un livre via son isbn");
+					System.out.println("2. Consulter un lecteur via son id");
 					System.out.println("3. Consulter l'historique des prêts");
 					System.out.println("4. Exit");
 				}
 			}
 
-			if(str == 1){
-				System.out.println("Exécuter le choix 1");
-				// Code get lecteur
+			boolean succes = false;
+			String commandString = "";
+			int c = 0;
+			URL req;
+			HttpURLConnection con = null;
+			if (strInt == 1) {
+				String isbn = "";
+				String auteur;
+				String titre;
+				String editeur;
+				Long edition;
+				JSONObject jo = null;
+				while (!succes) {
+					System.out.println("Veuillez indiquer l'isbn (0 pour exit): ");
+					if(c==0) {
+						sc.nextLine();
+						c++;
+					}
+					commandString = sc.nextLine();
+					req = new URL("http://localhost:8003/livres/isbn/" + commandString);
+					con = (HttpURLConnection) req.openConnection();
+					con.setRequestMethod("GET");
+					con.setRequestProperty("User-Agent", "Mozilla/5.0");
+					responseCode = con.getResponseCode();
+					if (responseCode == HttpURLConnection.HTTP_OK) { // success
+						BufferedReader in = new BufferedReader(new InputStreamReader(
+								con.getInputStream()));
+						String inputLine;
+						StringBuffer response = new StringBuffer();
 
+						while ((inputLine = in.readLine()) != null) {
+							response.append(inputLine);
+						}
+						in.close();
+
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							jo = new JSONObject(response.toString());
+							titre = jo.getString("titre");
+							auteur = jo.getString("auteur");
+							isbn = jo.getString("isbn");
+							editeur = jo.getString("editeur");
+							edition = jo.getLong("edition");
+						}
+						catch(JSONException e){
+							System.out.println(e.getMessage());
+						}
+					} else {
+						System.out.println("GET request not worked");
+					}
+
+					if (isbn.equalsIgnoreCase(commandString) || commandString.equals("0")) {
+						//Afficher
+						System.out.println(jo);
+						if (commandString.equals("0")) {
+							System.out.println("----- Fin de l'opération de recherche de livre par isbn, exit...");
+						}
+						succes = true;
+						commandString = "";
+					} else {
+						System.out.println("Mauvais isbn, le livre n'existe pas dans notre base ! Pour exit tapez 0");
+						commandString = "";
+					}
+				}
+			}
+			if (strInt == 2) {
 
 			}
-			if(str == 2){
-				System.out.println("Exécuter le choix 2");
-			}
-			if(str == 3){
+			if (strInt == 3) {
 				System.out.println("Exécuter le choix 3");
 			}
-			if(str == 4){
+			if (strInt == 4) {
 				endProgram = true;
 			}
 			bonchoix = false;
 		}
 
-		System.out.println("fin du scenario !!");
+
+		System.out.println("----- Fin du scenario !!");
+		System.exit(1);
 
 	}
 
