@@ -24,7 +24,7 @@ public class BibliothequeApplication {
 
 		SpringApplication.run(BibliothequeApplication.class, args);
 
-		/*System.out.println("CA MARCHEEEEE !");
+		System.out.println("CA MARCHEEEEE !");
 
 		URL obj = null;
 		try {
@@ -49,17 +49,22 @@ public class BibliothequeApplication {
 				in.close();
 
 
-				// print result
+				// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+				// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
 				System.out.println(response.toString());
 				JSONObject jo = new JSONObject(response.toString());
 				String titre = jo.getString("titre");
+				String auteur = jo.getString("auteur");
+				String isbn = jo.getString("isbn");
+				String editeur = jo.getString("editeur");
+				Long edition = jo.getLong("edition");
 				System.out.println(titre);
 			} else {
 				System.out.println("GET request not worked");
 			}
 		} catch (IOException | JSONException e) {
 			e.printStackTrace();
-		}*/
+		}
 
 		boolean endProgram = false;
 		boolean bonchoix = false;
