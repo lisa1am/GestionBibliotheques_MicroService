@@ -1,6 +1,9 @@
 package fr.dauphine.miage.Biblio;
 
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -22,7 +25,7 @@ public class BibliothequeApplication {
 
 		URL obj = null;
 		try {
-			obj = new URL("http://localhost:8000/livres/isbn/1");
+			obj = new URL("http://localhost:8001/livres/isbn/1");
 		HttpURLConnection con = null;
 		con = (HttpURLConnection) obj.openConnection();
 
@@ -37,17 +40,22 @@ public class BibliothequeApplication {
 			String inputLine;
 			StringBuffer response = new StringBuffer();
 
+
+
 			while ((inputLine = in.readLine()) != null) {
 				response.append(inputLine);
 			}
 			in.close();
 
+			JSONObject ja = new JSONObject(response.toString());
+			String nom = ja.getString("titre");
+			System.out.println(nom);
 			// print result
 			System.out.println(response.toString());
 		} else {
 			System.out.println("GET request not worked");
 		}
-		} catch (IOException e) {
+		} catch (IOException | JSONException e) {
 			e.printStackTrace();
 		}
 
