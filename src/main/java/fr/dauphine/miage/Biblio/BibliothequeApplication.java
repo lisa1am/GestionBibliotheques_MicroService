@@ -21,8 +21,8 @@ import java.util.Scanner;
 @SpringBootApplication
 public class BibliothequeApplication {
 
-	public URL req;
-	public HttpURLConnection con = null;
+	public static URL req;
+	public static HttpURLConnection con = null;
 
 	public static void main(String[] args) throws IOException {
 
@@ -233,48 +233,30 @@ public class BibliothequeApplication {
 					}
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
-						req = new URL("http://localhost:8003/livres/auteur/" + commandString.replaceAll(" ", "%20"));
-						con = (HttpURLConnection) req.openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "Mozilla/5.0");
-						responseCode = con.getResponseCode();
-						if (responseCode == HttpURLConnection.HTTP_OK) { // success
-							BufferedReader in = new BufferedReader(new InputStreamReader(
-									con.getInputStream()));
-							String inputLine;
-							StringBuffer response = new StringBuffer();
 
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-							in.close();
-
-							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
-							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
-							try {
-								joArray = new JSONArray(response.toString());
-								if (joArray.length() > 0 || commandString.equals("q")) {
-									for (int i = 0; i < joArray.length(); i++) {
-										jo = joArray.getJSONObject(i);
-										titre = jo.getString("titre");
-										auteur = jo.getString("auteur");
-										isbn = jo.getString("isbn");
-										editeur = jo.getString("editeur");
-										edition = jo.getLong("edition");
-										System.out.println(jo);
-									}
-									if (commandString.equals("q")) {
-										System.out.println("----- Fin de l'opération de recherche de livres d'un auteur, exit...");
-									}
-									succes = true;
-								} else {
-									System.out.println("Mauvais auteur, aucun livre n'existe pas dans notre base ! Pour exit tapez q");
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							joArray = urlRetArray("http://localhost:8003/livres/auteur/" + commandString.replaceAll(" ", "%20"));
+							if (joArray.length() > 0 || commandString.equals("q")) {
+								for (int i = 0; i < joArray.length(); i++) {
+									jo = joArray.getJSONObject(i);
+									titre = jo.getString("titre");
+									auteur = jo.getString("auteur");
+									isbn = jo.getString("isbn");
+									editeur = jo.getString("editeur");
+									edition = jo.getLong("edition");
+									System.out.println(jo);
 								}
-							} catch (JSONException e) {
-								System.out.println(e.getMessage());
+								if (commandString.equals("q")) {
+									System.out.println("----- Fin de l'opération de recherche de livres d'un auteur, exit...");
+								}
+								succes = true;
+							} else {
+								System.out.println("Mauvais auteur, aucun livre n'existe pas dans notre base ! Pour exit tapez q");
 							}
-						} else {
-							System.out.println("GET request not worked");
+						} catch (JSONException e) {
+							System.out.println(e.getMessage());
 						}
 					}
 					else{
@@ -345,27 +327,10 @@ public class BibliothequeApplication {
 					}
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
-						req = new URL("http://localhost:8001/lecteurs/nom/" + commandString);
-
-						con = (HttpURLConnection) req.openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "Mozilla/5.0");
-						responseCode = con.getResponseCode();
-						if (responseCode == HttpURLConnection.HTTP_OK) { // success
-							BufferedReader in = new BufferedReader(new InputStreamReader(
-									con.getInputStream()));
-							String inputLine;
-							StringBuffer response = new StringBuffer();
-
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-							in.close();
-
 							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
 							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
 							try {
-								joArray = new JSONArray(response.toString());
+								joArray = urlRetArray("http://localhost:8001/lecteurs/nom/" + commandString);
 								if (joArray.length() > 0 || commandString.equals("q")) {
 									for (int i = 0; i < joArray.length(); i++) {
 										jo = joArray.getJSONObject(i);
@@ -387,9 +352,6 @@ public class BibliothequeApplication {
 							} catch (JSONException e) {
 								System.out.println(e.getMessage());
 							}
-						} else {
-							System.out.println("GET request not worked");
-						}
 					}
 					else{
 						succes = true;
@@ -405,27 +367,11 @@ public class BibliothequeApplication {
 					}
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
-						req = new URL("http://localhost:8002/prets/lecteur/" + commandString);
-
-						con = (HttpURLConnection) req.openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "Mozilla/5.0");
-						responseCode = con.getResponseCode();
-						if (responseCode == HttpURLConnection.HTTP_OK) { // success
-							BufferedReader in = new BufferedReader(new InputStreamReader(
-									con.getInputStream()));
-							String inputLine;
-							StringBuffer response = new StringBuffer();
-
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-							in.close();
 
 							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
 							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
 							try {
-								joArray = new JSONArray(response.toString());
+								joArray = urlRetArray("http://localhost:8002/prets/lecteur/" + commandString);
 								if (joArray.length() > 0 || commandString.equals("q")) {
 									for (int i = 0; i < joArray.length(); i++) {
 										jo = joArray.getJSONObject(i);
@@ -445,9 +391,6 @@ public class BibliothequeApplication {
 							} catch (JSONException e) {
 								System.out.println(e.getMessage());
 							}
-						} else {
-							System.out.println("GET request not worked");
-						}
 					}
 					else{
 						succes = true;
@@ -463,27 +406,11 @@ public class BibliothequeApplication {
 					}
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
-						req = new URL("http://localhost:8002/prets/isbn/" + commandString);
-
-						con = (HttpURLConnection) req.openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "Mozilla/5.0");
-						responseCode = con.getResponseCode();
-						if (responseCode == HttpURLConnection.HTTP_OK) { // success
-							BufferedReader in = new BufferedReader(new InputStreamReader(
-									con.getInputStream()));
-							String inputLine;
-							StringBuffer response = new StringBuffer();
-
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-							in.close();
 
 							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
 							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
 							try {
-								joArray = new JSONArray(response.toString());
+								joArray = urlRetArray("http://localhost:8002/prets/isbn/" + commandString);
 								if (joArray.length() > 0 || commandString.equals("q")) {
 									for (int i = 0; i < joArray.length(); i++) {
 										jo = joArray.getJSONObject(i);
@@ -503,9 +430,6 @@ public class BibliothequeApplication {
 							} catch (JSONException e) {
 								System.out.println(e.getMessage());
 							}
-						} else {
-							System.out.println("GET request not worked");
-						}
 					}
 					else{
 						succes = true;
@@ -576,27 +500,11 @@ public class BibliothequeApplication {
 					}
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
-						req = new URL("http://localhost:8002/prets/date/" + commandString);
-
-						con = (HttpURLConnection) req.openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "Mozilla/5.0");
-						responseCode = con.getResponseCode();
-						if (responseCode == HttpURLConnection.HTTP_OK) { // success
-							BufferedReader in = new BufferedReader(new InputStreamReader(
-									con.getInputStream()));
-							String inputLine;
-							StringBuffer response = new StringBuffer();
-
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-							in.close();
 
 							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
 							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
 							try {
-								joArray = new JSONArray(response.toString());
+								joArray = urlRetArray("http://localhost:8002/prets/date/" + commandString);
 								if (joArray.length() > 0 || commandString.equals("q")) {
 									for (int i = 0; i < joArray.length(); i++) {
 										jo = joArray.getJSONObject(i);
@@ -616,9 +524,6 @@ public class BibliothequeApplication {
 							} catch (JSONException e) {
 								System.out.println(e.getMessage());
 							}
-						} else {
-							System.out.println("GET request not worked");
-						}
 					}
 					else{
 						succes = true;
@@ -634,27 +539,11 @@ public class BibliothequeApplication {
 					}
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
-						req = new URL("http://localhost:8002/prets/encours/");
-
-						con = (HttpURLConnection) req.openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "Mozilla/5.0");
-						responseCode = con.getResponseCode();
-						if (responseCode == HttpURLConnection.HTTP_OK) { // success
-							BufferedReader in = new BufferedReader(new InputStreamReader(
-									con.getInputStream()));
-							String inputLine;
-							StringBuffer response = new StringBuffer();
-
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-							in.close();
 
 							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
 							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
 							try {
-								joArray = new JSONArray(response.toString());
+								joArray = urlRetArray("http://localhost:8002/prets/encours/");
 								if (joArray.length() > 0 || commandString.equals("q")) {
 									for (int i = 0; i < joArray.length(); i++) {
 										jo = joArray.getJSONObject(i);
@@ -674,9 +563,6 @@ public class BibliothequeApplication {
 							} catch (JSONException e) {
 								System.out.println(e.getMessage());
 							}
-						} else {
-							System.out.println("GET request not worked");
-						}
 					}
 					else{
 						succes = true;
@@ -695,7 +581,9 @@ public class BibliothequeApplication {
 
 	}
 
-	public JSONArray urlRetArray(String url) throws IOException {
+	public static JSONArray urlRetArray(String url) throws IOException {
+		StringBuffer response= new StringBuffer();
+		JSONArray joArray=null;
 		req = new URL(url);
 		con = (HttpURLConnection) req.openConnection();
 		con.setRequestMethod("GET");
@@ -705,21 +593,21 @@ public class BibliothequeApplication {
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					con.getInputStream()));
 			String inputLine;
-			StringBuffer response = new StringBuffer();
+			response = new StringBuffer();
 
 			while ((inputLine = in.readLine()) != null) {
 				response.append(inputLine);
 			}
 			in.close();
-			try {
-				return new JSONArray(response.toString());
-			}catch(JSONException j){
-				System.out.println(j.getMessage());
-			}
 		}else {
 			System.out.println("GET request not worked");
 		}
-		return null;
+		try {
+			joArray =  new JSONArray(response.toString());
+		}catch(JSONException j){
+			System.out.println(j.getMessage());
+		}
+		return  joArray;
 	}
 
 }
