@@ -21,6 +21,9 @@ import java.util.Scanner;
 @SpringBootApplication
 public class BibliothequeApplication {
 
+	public URL req;
+	public HttpURLConnection con = null;
+
 	public static void main(String[] args) throws IOException {
 
 		SpringApplication.run(BibliothequeApplication.class, args);
@@ -106,7 +109,7 @@ public class BibliothequeApplication {
 		int strInt = 0;
 		Scanner sc = new Scanner(System.in);
 		ArrayList<Integer> choix = new ArrayList<Integer>();
-		int nbchoix = 8;
+		int nbchoix = 10;
 		for (int i = 1; i <= nbchoix; i++) {
 			choix.add(i);
 		}
@@ -118,7 +121,10 @@ public class BibliothequeApplication {
 			System.out.println("4. Consulter les lecteurs avec un nom");
 			System.out.println("5. Consulter les prets d'un lecteur");
 			System.out.println("6. Consulter les pret d'un livre");
-			System.out.println("7. Exit");
+			System.out.println("7. Consulter un pret par isbn et identifiant lecteur");
+			System.out.println("8. Consulter les prets par date de pret");
+			System.out.println("9. Consulter les prets en cours");
+			System.out.println("10. Exit");
 
 			while (!bonchoix) {
 				System.out.println("Veuillez faire un choix :");
@@ -134,7 +140,10 @@ public class BibliothequeApplication {
 					System.out.println("4. Consulter les lecteurs avec un nom");
 					System.out.println("5. Consulter les prets d'un lecteur");
 					System.out.println("6. Consulter les pret d'un livre");
-					System.out.println("7. Exit");
+					System.out.println("7. Consulter un pret par isbn et identifiant lecteur");
+					System.out.println("8. Consulter les prets par date de pret");
+					System.out.println("9. Consulter les prets en cours");
+					System.out.println("10. Exit");
 
 				}
 			}
@@ -503,7 +512,178 @@ public class BibliothequeApplication {
 					}
 				}
 			}
-			if(strInt==7){
+			if(strInt == 7){
+				while (!succes) {
+					System.out.println("Veuillez indiquer l'isbn (q pour exit): ");
+					if(c==0) {
+						sc.nextLine();
+						c++;
+					}
+					commandString = sc.nextLine();
+					System.out.println("Veuillez indiquer l'identifiant lecteur (q pour exit): ");
+					String commandString2 = sc.nextLine();
+					if(!commandString.equals("q") && !commandString2.equals("q")) {
+						req = new URL("http://localhost:8002/prets/lecteur/"+commandString2+"/isbn/" + commandString);
+						con = (HttpURLConnection) req.openConnection();
+						con.setRequestMethod("GET");
+						con.setRequestProperty("User-Agent", "Mozilla/5.0");
+						responseCode = con.getResponseCode();
+						if (responseCode == HttpURLConnection.HTTP_OK) { // success
+							BufferedReader in = new BufferedReader(new InputStreamReader(
+									con.getInputStream()));
+							String inputLine;
+							StringBuffer response = new StringBuffer();
+
+							while ((inputLine = in.readLine()) != null) {
+								response.append(inputLine);
+							}
+							in.close();
+
+							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+							try {
+								jo = new JSONObject(response.toString());
+								idf = jo.getLong("lecteur");
+								isbn = jo.getString("isbn");
+								datepret = jo.getString("date_pret");
+								dateretour = jo.getString("date_retour");
+							} catch (JSONException e) {
+								System.out.println(e.getMessage());
+							}
+						} else {
+							System.out.println("GET request not worked");
+						}
+					}
+
+					if (jo!=null || commandString.equals("q") || commandString2.equals("q")) {
+						//Afficher
+						System.out.println(jo);
+						if (commandString.equals("q") || commandString2.equals("q")) {
+							System.out.println("----- Fin de l'opération de recherche de pret par isbn/identifiant, exit...");
+						}
+						succes = true;
+					} else {
+						System.out.println("Mauvais couple isbn/identifiant lecteur, le pret n'existe pas dans notre base ! Pour exit tapez q");
+					}
+				}
+			}
+			if(strInt==8){
+				while (!succes) {
+					System.out.println("Veuillez indiquer la date de pret (q pour exit): ");
+					if(c==0) {
+						sc.nextLine();
+						c++;
+					}
+					commandString = sc.nextLine();
+					if(!commandString.equals("q")) {
+						req = new URL("http://localhost:8002/prets/date/" + commandString);
+
+						con = (HttpURLConnection) req.openConnection();
+						con.setRequestMethod("GET");
+						con.setRequestProperty("User-Agent", "Mozilla/5.0");
+						responseCode = con.getResponseCode();
+						if (responseCode == HttpURLConnection.HTTP_OK) { // success
+							BufferedReader in = new BufferedReader(new InputStreamReader(
+									con.getInputStream()));
+							String inputLine;
+							StringBuffer response = new StringBuffer();
+
+							while ((inputLine = in.readLine()) != null) {
+								response.append(inputLine);
+							}
+							in.close();
+
+							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+							try {
+								joArray = new JSONArray(response.toString());
+								if (joArray.length() > 0 || commandString.equals("q")) {
+									for (int i = 0; i < joArray.length(); i++) {
+										jo = joArray.getJSONObject(i);
+										idf = jo.getLong("lecteur");
+										isbn = jo.getString("isbn");
+										datepret = jo.getString("date_pret");
+										dateretour = jo.getString("date_retour");
+										System.out.println(jo);
+									}
+									if (commandString.equals("q")) {
+										System.out.println("----- Fin de l'opération de recherche de pret par date de pret, exit...");
+									}
+									succes = true;
+								} else {
+									System.out.println("Mauvaise date de pret, aucun pret n'existe pas dans notre base ! Pour exit tapez q");
+								}
+							} catch (JSONException e) {
+								System.out.println(e.getMessage());
+							}
+						} else {
+							System.out.println("GET request not worked");
+						}
+					}
+					else{
+						succes = true;
+					}
+				}
+			}
+			if(strInt==9){
+				while (!succes) {
+					System.out.println("Vous allez voir les prets en cours, tapez entrer (q pour exit): ");
+					if(c==0) {
+						sc.nextLine();
+						c++;
+					}
+					commandString = sc.nextLine();
+					if(!commandString.equals("q")) {
+						req = new URL("http://localhost:8002/prets/encours/");
+
+						con = (HttpURLConnection) req.openConnection();
+						con.setRequestMethod("GET");
+						con.setRequestProperty("User-Agent", "Mozilla/5.0");
+						responseCode = con.getResponseCode();
+						if (responseCode == HttpURLConnection.HTTP_OK) { // success
+							BufferedReader in = new BufferedReader(new InputStreamReader(
+									con.getInputStream()));
+							String inputLine;
+							StringBuffer response = new StringBuffer();
+
+							while ((inputLine = in.readLine()) != null) {
+								response.append(inputLine);
+							}
+							in.close();
+
+							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+							try {
+								joArray = new JSONArray(response.toString());
+								if (joArray.length() > 0 || commandString.equals("q")) {
+									for (int i = 0; i < joArray.length(); i++) {
+										jo = joArray.getJSONObject(i);
+										idf = jo.getLong("lecteur");
+										isbn = jo.getString("isbn");
+										datepret = jo.getString("date_pret");
+										dateretour = jo.getString("date_retour");
+										System.out.println(jo);
+									}
+									if (commandString.equals("q")) {
+										System.out.println("----- Fin de l'opération de recherche de pret par date de pret, exit...");
+									}
+									succes = true;
+								} else {
+									System.out.println("Aucun pret en cours n'existe pas dans notre base ! Pour exit tapez q");
+								}
+							} catch (JSONException e) {
+								System.out.println(e.getMessage());
+							}
+						} else {
+							System.out.println("GET request not worked");
+						}
+					}
+					else{
+						succes = true;
+					}
+				}
+			}
+			if(strInt==10){
 				endProgram = true;
 			}
 			bonchoix = false;
@@ -513,6 +693,33 @@ public class BibliothequeApplication {
 		System.out.println("----- Fin du scenario !!");
 		System.exit(1);
 
+	}
+
+	public JSONArray urlRetArray(String url) throws IOException {
+		req = new URL(url);
+		con = (HttpURLConnection) req.openConnection();
+		con.setRequestMethod("GET");
+		con.setRequestProperty("User-Agent", "Mozilla/5.0");
+		int responseCode = con.getResponseCode();
+		if (responseCode == HttpURLConnection.HTTP_OK) { // success
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+			try {
+				return new JSONArray(response.toString());
+			}catch(JSONException j){
+				System.out.println(j.getMessage());
+			}
+		}else {
+			System.out.println("GET request not worked");
+		}
+		return null;
 	}
 
 }
