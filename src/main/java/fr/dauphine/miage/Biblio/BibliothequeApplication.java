@@ -177,42 +177,17 @@ public class BibliothequeApplication {
 					}
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
-						req = new URL("http://localhost:8003/livres/isbn/" + commandString);
-						con = (HttpURLConnection) req.openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "Mozilla/5.0");
-						responseCode = con.getResponseCode();
-						if (responseCode == HttpURLConnection.HTTP_OK) { // success
-							BufferedReader in = new BufferedReader(new InputStreamReader(
-									con.getInputStream()));
-							String inputLine;
-							StringBuffer response = new StringBuffer();
 
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-							in.close();
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
 
-							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
-							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
-							try {
-								jo = new JSONObject(response.toString());
-								titre = jo.getString("titre");
-								auteur = jo.getString("auteur");
-								isbn = jo.getString("isbn");
-								editeur = jo.getString("editeur");
-								edition = jo.getLong("edition");
-							} catch (JSONException e) {
-								System.out.println(e.getMessage());
-							}
-						} else {
-							System.out.println("GET request not worked");
-						}
+						jo = urlRetObject("http://localhost:8003/livres/isbn/" + commandString);
+
 					}
 
 					if (jo!=null || commandString.equals("q")) {
 						//Afficher
-						System.out.println(jo);
+						toStringObject("livre",jo);
 						if (commandString.equals("q")) {
 							System.out.println("----- Fin de l'opération de recherche de livre par isbn, exit...");
 						}
@@ -241,12 +216,7 @@ public class BibliothequeApplication {
 							if (joArray.length() > 0 || commandString.equals("q")) {
 								for (int i = 0; i < joArray.length(); i++) {
 									jo = joArray.getJSONObject(i);
-									titre = jo.getString("titre");
-									auteur = jo.getString("auteur");
-									isbn = jo.getString("isbn");
-									editeur = jo.getString("editeur");
-									edition = jo.getLong("edition");
-									System.out.println(jo);
+									toStringObject("livre", jo);
 								}
 								if (commandString.equals("q")) {
 									System.out.println("----- Fin de l'opération de recherche de livres d'un auteur, exit...");
@@ -273,42 +243,17 @@ public class BibliothequeApplication {
 					}
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
-						req = new URL("http://localhost:8001/lecteurs/idf/" + commandString);
-						con = (HttpURLConnection) req.openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "Mozilla/5.0");
-						responseCode = con.getResponseCode();
-						if (responseCode == HttpURLConnection.HTTP_OK) { // success
-							BufferedReader in = new BufferedReader(new InputStreamReader(
-									con.getInputStream()));
-							String inputLine;
-							StringBuffer response = new StringBuffer();
 
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-							in.close();
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
 
-							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
-							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
-							try {
-								jo = new JSONObject(response.toString());
-								idf = jo.getLong("idf");
-								genre = jo.getString("genre");
-								nom = jo.getString("nom");
-								prenom = jo.getString("prenom");
-								date_naissance = jo.getString("date_naissance");
-								adresse = jo.getString("adresse");
-							} catch (JSONException e) {
-								System.out.println(e.getMessage());
-							}
-						} else {
-							System.out.println("GET request not worked");
-						}
+						jo = urlRetObject("http://localhost:8001/lecteurs/idf/" + commandString);
+
+
 					}
 
 					if (jo!=null || commandString.equals("q")) {
-						System.out.println(jo);
+						toStringObject("lecteur",jo);
 						if (commandString.equals("q")) {
 							System.out.println("----- Fin de l'opération de recherche de lecteur par idf, exit...");
 						}
@@ -327,31 +272,25 @@ public class BibliothequeApplication {
 					}
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
-							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
-							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
-							try {
-								joArray = urlRetArray("http://localhost:8001/lecteurs/nom/" + commandString);
-								if (joArray.length() > 0 || commandString.equals("q")) {
-									for (int i = 0; i < joArray.length(); i++) {
-										jo = joArray.getJSONObject(i);
-										idf = jo.getLong("idf");
-										genre = jo.getString("genre");
-										nom = jo.getString("nom");
-										prenom = jo.getString("prenom");
-										date_naissance = jo.getString("date_naissance");
-										adresse = jo.getString("adresse");
-										System.out.println(jo);
-									}
-									if (commandString.equals("q")) {
-										System.out.println("----- Fin de l'opération de recherche de lecteurs par nom, exit...");
-									}
-									succes = true;
-								} else {
-									System.out.println("Mauvais nom, aucun lecteur n'existe pas dans notre base ! Pour exit tapez q");
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							joArray = urlRetArray("http://localhost:8001/lecteurs/nom/" + commandString);
+							if (joArray.length() > 0 || commandString.equals("q")) {
+								for (int i = 0; i < joArray.length(); i++) {
+									jo = joArray.getJSONObject(i);
+									toStringObject("lecteur",jo);
 								}
-							} catch (JSONException e) {
-								System.out.println(e.getMessage());
+								if (commandString.equals("q")) {
+									System.out.println("----- Fin de l'opération de recherche de lecteurs par nom, exit...");
+								}
+								succes = true;
+							} else {
+								System.out.println("Mauvais nom, aucun lecteur n'existe pas dans notre base ! Pour exit tapez q");
 							}
+						} catch (JSONException e) {
+							System.out.println(e.getMessage());
+						}
 					}
 					else{
 						succes = true;
@@ -368,29 +307,25 @@ public class BibliothequeApplication {
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
 
-							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
-							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
-							try {
-								joArray = urlRetArray("http://localhost:8002/prets/lecteur/" + commandString);
-								if (joArray.length() > 0 || commandString.equals("q")) {
-									for (int i = 0; i < joArray.length(); i++) {
-										jo = joArray.getJSONObject(i);
-										idf = jo.getLong("lecteur");
-										isbn = jo.getString("isbn");
-										datepret = jo.getString("date_pret");
-										dateretour = jo.getString("date_retour");
-										System.out.println(jo);
-									}
-									if (commandString.equals("q")) {
-										System.out.println("----- Fin de l'opération de recherche de prets par lecteur, exit...");
-									}
-									succes = true;
-								} else {
-									System.out.println("Mauvais idf, le pret n'existe pas dans notre base ! Pour exit tapez q");
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							joArray = urlRetArray("http://localhost:8002/prets/lecteur/" + commandString);
+							if (joArray.length() > 0 || commandString.equals("q")) {
+								for (int i = 0; i < joArray.length(); i++) {
+									jo = joArray.getJSONObject(i);
+									toStringObject("pret",jo);
 								}
-							} catch (JSONException e) {
-								System.out.println(e.getMessage());
+								if (commandString.equals("q")) {
+									System.out.println("----- Fin de l'opération de recherche de prets par lecteur, exit...");
+								}
+								succes = true;
+							} else {
+								System.out.println("Mauvais idf, le pret n'existe pas dans notre base ! Pour exit tapez q");
 							}
+						} catch (JSONException e) {
+							System.out.println(e.getMessage());
+						}
 					}
 					else{
 						succes = true;
@@ -407,29 +342,25 @@ public class BibliothequeApplication {
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
 
-							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
-							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
-							try {
-								joArray = urlRetArray("http://localhost:8002/prets/isbn/" + commandString);
-								if (joArray.length() > 0 || commandString.equals("q")) {
-									for (int i = 0; i < joArray.length(); i++) {
-										jo = joArray.getJSONObject(i);
-										idf = jo.getLong("lecteur");
-										isbn = jo.getString("isbn");
-										datepret = jo.getString("date_pret");
-										dateretour = jo.getString("date_retour");
-										System.out.println(jo);
-									}
-									if (commandString.equals("q")) {
-										System.out.println("----- Fin de l'opération de recherche de pret par isbn, exit...");
-									}
-									succes = true;
-								} else {
-									System.out.println("Mauvais isbn, le pret n'existe pas dans notre base ! Pour exit tapez q");
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							joArray = urlRetArray("http://localhost:8002/prets/isbn/" + commandString);
+							if (joArray.length() > 0 || commandString.equals("q")) {
+								for (int i = 0; i < joArray.length(); i++) {
+									jo = joArray.getJSONObject(i);
+									toStringObject("pret",jo);
 								}
-							} catch (JSONException e) {
-								System.out.println(e.getMessage());
+								if (commandString.equals("q")) {
+									System.out.println("----- Fin de l'opération de recherche de pret par isbn, exit...");
+								}
+								succes = true;
+							} else {
+								System.out.println("Mauvais isbn, le pret n'existe pas dans notre base ! Pour exit tapez q");
 							}
+						} catch (JSONException e) {
+							System.out.println(e.getMessage());
+						}
 					}
 					else{
 						succes = true;
@@ -447,41 +378,18 @@ public class BibliothequeApplication {
 					System.out.println("Veuillez indiquer l'identifiant lecteur (q pour exit): ");
 					String commandString2 = sc.nextLine();
 					if(!commandString.equals("q") && !commandString2.equals("q")) {
-						req = new URL("http://localhost:8002/prets/lecteur/"+commandString2+"/isbn/" + commandString);
-						con = (HttpURLConnection) req.openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "Mozilla/5.0");
-						responseCode = con.getResponseCode();
-						if (responseCode == HttpURLConnection.HTTP_OK) { // success
-							BufferedReader in = new BufferedReader(new InputStreamReader(
-									con.getInputStream()));
-							String inputLine;
-							StringBuffer response = new StringBuffer();
 
-							while ((inputLine = in.readLine()) != null) {
-								response.append(inputLine);
-							}
-							in.close();
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
 
-							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
-							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
-							try {
-								jo = new JSONObject(response.toString());
-								idf = jo.getLong("lecteur");
-								isbn = jo.getString("isbn");
-								datepret = jo.getString("date_pret");
-								dateretour = jo.getString("date_retour");
-							} catch (JSONException e) {
-								System.out.println(e.getMessage());
-							}
-						} else {
-							System.out.println("GET request not worked");
-						}
+						jo = urlRetObject("http://localhost:8002/prets/lecteur/"+commandString2+"/isbn/" + commandString);
+
+
 					}
 
 					if (jo!=null || commandString.equals("q") || commandString2.equals("q")) {
 						//Afficher
-						System.out.println(jo);
+						toStringObject("pret",jo);
 						if (commandString.equals("q") || commandString2.equals("q")) {
 							System.out.println("----- Fin de l'opération de recherche de pret par isbn/identifiant, exit...");
 						}
@@ -501,29 +409,25 @@ public class BibliothequeApplication {
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
 
-							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
-							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
-							try {
-								joArray = urlRetArray("http://localhost:8002/prets/date/" + commandString);
-								if (joArray.length() > 0 || commandString.equals("q")) {
-									for (int i = 0; i < joArray.length(); i++) {
-										jo = joArray.getJSONObject(i);
-										idf = jo.getLong("lecteur");
-										isbn = jo.getString("isbn");
-										datepret = jo.getString("date_pret");
-										dateretour = jo.getString("date_retour");
-										System.out.println(jo);
-									}
-									if (commandString.equals("q")) {
-										System.out.println("----- Fin de l'opération de recherche de pret par date de pret, exit...");
-									}
-									succes = true;
-								} else {
-									System.out.println("Mauvaise date de pret, aucun pret n'existe pas dans notre base ! Pour exit tapez q");
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							joArray = urlRetArray("http://localhost:8002/prets/date/" + commandString);
+							if (joArray.length() > 0 || commandString.equals("q")) {
+								for (int i = 0; i < joArray.length(); i++) {
+									jo = joArray.getJSONObject(i);
+									toStringObject("pret",jo);
 								}
-							} catch (JSONException e) {
-								System.out.println(e.getMessage());
+								if (commandString.equals("q")) {
+									System.out.println("----- Fin de l'opération de recherche de pret par date de pret, exit...");
+								}
+								succes = true;
+							} else {
+								System.out.println("Mauvaise date de pret, aucun pret n'existe pas dans notre base ! Pour exit tapez q");
 							}
+						} catch (JSONException e) {
+							System.out.println(e.getMessage());
+						}
 					}
 					else{
 						succes = true;
@@ -540,29 +444,25 @@ public class BibliothequeApplication {
 					commandString = sc.nextLine();
 					if(!commandString.equals("q")) {
 
-							// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
-							// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
-							try {
-								joArray = urlRetArray("http://localhost:8002/prets/encours/");
-								if (joArray.length() > 0 || commandString.equals("q")) {
-									for (int i = 0; i < joArray.length(); i++) {
-										jo = joArray.getJSONObject(i);
-										idf = jo.getLong("lecteur");
-										isbn = jo.getString("isbn");
-										datepret = jo.getString("date_pret");
-										dateretour = jo.getString("date_retour");
-										System.out.println(jo);
-									}
-									if (commandString.equals("q")) {
-										System.out.println("----- Fin de l'opération de recherche de pret par date de pret, exit...");
-									}
-									succes = true;
-								} else {
-									System.out.println("Aucun pret en cours n'existe pas dans notre base ! Pour exit tapez q");
+						// CODE POUR RÉCUPÉRER CHAQUE CHAMP SEUL
+						// METTRE Long id = jo.getLong("id") si on veur récupérer un Long au lieu de string
+						try {
+							joArray = urlRetArray("http://localhost:8002/prets/encours/");
+							if (joArray.length() > 0 || commandString.equals("q")) {
+								for (int i = 0; i < joArray.length(); i++) {
+									jo = joArray.getJSONObject(i);
+									toStringObject("pret",jo);
 								}
-							} catch (JSONException e) {
-								System.out.println(e.getMessage());
+								if (commandString.equals("q")) {
+									System.out.println("----- Fin de l'opération de recherche de pret par date de pret, exit...");
+								}
+								succes = true;
+							} else {
+								System.out.println("Aucun pret en cours n'existe pas dans notre base ! Pour exit tapez q");
 							}
+						} catch (JSONException e) {
+							System.out.println(e.getMessage());
+						}
 					}
 					else{
 						succes = true;
@@ -608,6 +508,87 @@ public class BibliothequeApplication {
 			System.out.println(j.getMessage());
 		}
 		return  joArray;
+	}
+
+	public static JSONObject urlRetObject(String url) throws IOException {
+		StringBuffer response= new StringBuffer();
+		JSONObject jo=null;
+		req = new URL(url);
+		con = (HttpURLConnection) req.openConnection();
+		con.setRequestMethod("GET");
+		con.setRequestProperty("User-Agent", "Mozilla/5.0");
+		int responseCode = con.getResponseCode();
+		if (responseCode == HttpURLConnection.HTTP_OK) { // success
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					con.getInputStream()));
+			String inputLine;
+			response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+		}else {
+			System.out.println("GET request not worked");
+		}
+		try {
+			jo =  new JSONObject(response.toString());
+		}catch(JSONException j){
+			System.out.println(j.getMessage());
+		}
+		return  jo;
+	}
+
+	public static void toStringObject(String object, JSONObject jo){
+		try {
+			if (object.equals("lecteur")) {
+				Long idf = jo.getLong("idf");
+				String genre = jo.getString("genre");
+				String nom = jo.getString("nom");
+				String prenom = jo.getString("prenom");
+				String date_naissance = jo.getString("date_naissance");
+				String adresse = jo.getString("adresse");
+
+				System.out.println("Identifiant lecteur : "+idf);
+				System.out.println("Identité : "+genre+" "+nom+" "+prenom);
+				System.out.println("Date de naissance : "+date_naissance);
+				System.out.println("Adresse : "+adresse);
+				System.out.println("------------------------------------------");
+			}
+			if (object.equals("pret")) {
+				Long lecteur = jo.getLong("lecteur");
+				String isbn = jo.getString("isbn");
+				String datepret = jo.getString("date_pret");
+				String dateretour = jo.getString("date_retour");
+
+				System.out.println("Isbn : "+isbn);
+				System.out.println("Identifiant Lecteur : "+lecteur);
+				System.out.println("Date du pret : "+datepret);
+				if (!dateretour.equals("null")) {
+					System.out.println("Date du retour : "+dateretour);
+				}
+				else{
+					System.out.println("Le livre n'est pas encore retourné");
+				}
+				System.out.println("------------------------------------------");
+			}
+			if (object.equals("livre")) {
+				String titre = jo.getString("titre");
+				String auteur = jo.getString("auteur");
+				String isbn = jo.getString("isbn");
+				String editeur = jo.getString("editeur");
+				Long edition = jo.getLong("edition");
+
+				System.out.println("Titre : "+titre);
+				System.out.println("Auteur : "+auteur);
+				System.out.println("Isbn : "+isbn);
+				System.out.println("Editeur : "+editeur);
+				System.out.println("Edition : "+edition);
+				System.out.println("------------------------------------------");
+			}
+		} catch (JSONException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 }
